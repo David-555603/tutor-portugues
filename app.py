@@ -29,35 +29,59 @@ if modulo == "Inicio":
     st.write("Faltan pocos días para tu viaje a Brasil. ¡Es hora de practicar!")
 
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
+# --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 elif modulo == "💬 Simulador (Roleplay)":
-    st.title("💬 Simulador de Escenarios")
-    st.write("Di algo en portugués (ej. 'Olá, tudo bem?') y la IA evaluará tu pronunciación.")
-    
-    # Grabador de audio
-    audio_bytes = audio_recorder(
-        text="Haz clic para hablar 🎤", 
-        recording_color="#e83a30", 
-        neutral_color="#6aa36f"
-    )
-    
-    # Procesamiento del audio
-    if audio_bytes:
-        st.audio(audio_bytes, format="audio/wav")
-        st.info("🧠 Procesando tu pronunciación...")
+    st.title("💬 Simulador de Escenarios (Roleplay)")
+    st.write("Practica situaciones reales de tu viaje. La IA evaluará si respondes de manera adecuada.")
+
+    # Selector de escenarios (por ahora activamos Restaurante)
+    escenario = st.selectbox("Selecciona dónde estás:", ["🍽️ En el Restaurante", "✈️ En el Aeropuerto (Próximamente)", "🏨 En el Hotel (Próximamente)"])
+
+    if escenario == "🍽️ En el Restaurante":
+        st.subheader("Escenario: Ordenando comida en la Churrascaria")
         
-        # Convertimos el audio para que la IA lo entienda
-        r = sr.Recognizer()
-        with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
-            audio_data = r.record(source)
-            try:
-                # Usamos el motor de Google configurado en Portugués de Brasil (pt-BR)
-                texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
-                st.success(f"🗣️ **Entendí que dijiste:** {texto_reconocido}")
-                
-            except sr.UnknownValueError:
-                st.error("No pude entender el audio. Intenta hablar un poco más fuerte o claro.")
-            except sr.RequestError:
-                st.error("Error de conexión con el servicio de reconocimiento de voz.")
+        # Estado de la conversación para guiar al usuario
+        st.info("🤵 **El Garçom dice:** 'Olá! Boa noite. Você já sabe o que vai pedir ou gostaria de ver o cardápio?'")
+        st.write("💡 *Pista de traducción:* Te está saludando y preguntando si ya sabes qué pedir o si quieres ver el menú.")
+        
+        st.markdown("---")
+        st.write("🎯 **Tu objetivo:** Pídele el menú con educación usando lo aprendido en la teoría (puedes decir: *'Boa noite, o cardápio por favor'*).")
+        
+        # Grabador de audio (El oído de la app)
+        audio_bytes = audio_recorder(
+            text="Haz clic aquí y responde hablando 🎤", 
+            recording_color="#e83a30", 
+            neutral_color="#6aa36f"
+        )
+        
+        if audio_bytes:
+            st.audio(audio_bytes, format="audio/wav")
+            st.info("🧠 El mesero está procesando tu respuesta...")
+            
+            # Reconocimiento de voz (El cerebro de la app)
+            r = sr.Recognizer()
+            with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                audio_data = r.record(source)
+                try:
+                    # Transcribimos lo que el usuario dijo en portugués
+                    texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
+                    st.success(f"🗣️ **Dijiste:** '{texto_reconocido}'")
+                    
+                    # Evaluación lógica muy concreta
+                    texto_minusculas = texto_reconocido.lower()
+                    
+                    if "cardápio" in texto_minusculas or "cardapio" in texto_minusculas:
+                        st.balloons() # ¡Animación de globos por el éxito!
+                        st.success("🤵 **Garçom:** 'Com certeza! Aqui está o cardápio. Hoje a picanha está excelente.'")
+                        st.info("🌟 **Evaluación del Tutor:** ¡Excelente! El mesero entendió perfectamente que querías el menú (*cardápio*) y te lo ha entregado. ¡Misión cumplida por hoy!")
+                    else:
+                        st.warning("🤵 **Garçom:** 'Desculpe, não entendi...'")
+                        st.error("❌ **Evaluación del Tutor:** No mencionaste la palabra clave 'cardápio'. ¡Intenta grabar de nuevo diciendo 'O cardápio, por favor'!")
+                        
+                except sr.UnknownValueError:
+                    st.error("🎙️ No se escuchó muy claro. Intenta hablar un poco más fuerte o más cerca del micrófono.")
+                except sr.RequestError:
+                    st.error("🌐 Error de conexión con el servidor de voz.")
 
 # --- MÓDULO: GIMNASIO (FLASHCARDS) ---
 elif modulo == "🧠 Gimnasio (Flashcards)":
