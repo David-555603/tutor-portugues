@@ -31,8 +31,10 @@ if modulo == "Inicio":
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 elif modulo == "💬 Simulador (Roleplay)":
+    from gtts import gTTS # Importamos el generador de voz de Google
+
     st.title("💬 Simulador de Escenarios (Roleplay)")
-    st.write("Practica situaciones reales. Habla con el mesero y mantén la conversación.")
+    st.write("Practica situaciones reales. Escucha al mesero y mantén la conversación.")
 
     # Selector de escenarios
     escenario = st.selectbox("Selecciona dónde estás:", ["🍽️ En el Restaurante", "✈️ En el Aeropuerto (Próximamente)"])
@@ -40,41 +42,54 @@ elif modulo == "💬 Simulador (Roleplay)":
     if escenario == "🍽️ En el Restaurante":
         st.subheader("Escenario: Cenando en la Churrascaria")
         
+        # --- FUNCIÓN PARA QUE EL MESERO HABLE ---
+        def voz_mesero(texto):
+            # Generamos el audio en portugués de Brasil (pt-br)
+            tts = gTTS(text=texto, lang='pt', tld='com.br')
+            fp = io.BytesIO()
+            tts.write_to_fp(fp)
+            fp.seek(0)
+            st.audio(fp, format='audio/mp3')
+
         # --- CONTROL DE LA MEMORIA DE LA CONVERSACIÓN ---
-        # Si es la primera vez que entramos, empezamos en el Paso 1
         if "paso_conversacion" not in st.session_state:
             st.session_state.paso_conversacion = 1
-            st.session_state.historial = []
 
-        # Botón para reiniciar la conversación si el usuario quiere volver a empezar
         if st.button("🔄 Reiniciar conversación"):
             st.session_state.paso_conversacion = 1
-            st.session_state.historial = []
             st.rerun()
 
         # --- LÓGICA DE LOS PASOS ---
         
-        # PASO 1: El saludo y pedir el menú
+        # PASO 1: El saludo
         if st.session_state.paso_conversacion == 1:
-            st.info("🤵 **El Garçom diz:** 'Olá! Boa noite. Seja bem-vindo! Você já sabe o que vai pedir ou gostaria de ver o cardápio?'")
+            dialogo = "Olá! Boa noite. Seja bem-vindo! Você já sabe o que vai pedir ou gostaria de ver o cardápio?"
+            st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            voz_mesero(dialogo) # ¡Aquí suena el audio!
             st.write("🎯 **Tu objetivo:** Saluda y pídele el menú (ej. *'Boa noite, o cardápio por favor'*).")
 
-        # PASO 2: Ordenar la comida
+        # PASO 2: Ordenar
         elif st.session_state.paso_conversacion == 2:
-            st.info("🤵 **El Garçom diz:** 'Com certeza, aqui está o cardápio! Hoje a nossa picanha está maravilhosa. O que você vai querer comer?'")
-            st.write("🎯 **Tu objetivo:** Pide tu comida usando 'Eu quero' o 'Eu gostaria de' (ej. *'Eu quero a picanha, por favor'*).")
+            dialogo = "Com certeza, aqui está o cardápio! Hoje a nossa picanha está maravilhosa. O que você vai querer comer?"
+            st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            voz_mesero(dialogo)
+            st.write("🎯 **Tu objetivo:** Pide tu comida (ej. *'Eu quero a picanha, por favor'*).")
 
-        # PASO 3: Pedir la cuenta
+        # PASO 3: La cuenta
         elif st.session_state.paso_conversacion == 3:
-            st.info("🤵 **El Garçom diz:** 'Excelente escolha! Aqui está o seu prato... Bom apetite! ... Algo mais ou posso trazer a conta?'")
-            st.write("🎯 **Tu objetivo:** Dile que todo estuvo rico y pide la cuenta (ej. *'A conta, por favor'*).")
+            dialogo = "Excelente escolha! Aqui está o seu prato... Algo mais ou posso trazer a conta?"
+            st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            voz_mesero(dialogo)
+            st.write("🎯 **Tu objetivo:** Pide la cuenta (ej. *'A conta, por favor'*).")
         
-        # PASO FINAL: Despedida
+        # PASO FINAL
         elif st.session_state.paso_conversacion == 4:
-            st.success("🎉 ¡Felicidades! Completaste toda la conversación en el restaurante.")
-            st.info("🤵 **El Garçom diz:** 'Perfeito! Aqui está a conta. Muito obrigado pela visita e boa viagem pelo Brasil!'")
+            st.success("🎉 ¡Felicidades! Completaste toda la conversación.")
+            dialogo = "Perfeito! Aqui está a conta. Muito obrigado pela visita e boa viagem pelo Brasil!"
+            st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            voz_mesero(dialogo)
 
-        # --- EL MICRÓFONO (Solo se muestra si no hemos terminado) ---
+        # --- EL MICRÓFONO ---
         if st.session_state.paso_conversacion < 4:
             st.markdown("---")
             audio_bytes = audio_recorder(
@@ -84,45 +99,43 @@ elif modulo == "💬 Simulador (Roleplay)":
             )
             
             if audio_bytes:
-                st.audio(audio_bytes, format="audio/wav")
+                # Ocultamos la reproducción de tu propio audio para no saturar la pantalla
+                st.info("🧠 Escuchando tu acento...")
                 
-                # Procesar audio con la IA
                 r = sr.Recognizer()
                 with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
                     audio_data = r.record(source)
                     try:
                         texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
-                        st.success(f"🗣️ **Tu respuesta:** '{texto_reconocido}'")
+                        st.success(f"🗣️ **Te escuché decir:** '{texto_reconocido}'")
                         texto_min = texto_reconocido.lower()
                         
-                        # VALIDACIÓN SEGÚN EL PASO ACTUAL
                         if st.session_state.paso_conversacion == 1:
                             if "cardápio" in texto_min or "cardapio" in texto_min:
                                 st.session_state.paso_conversacion = 2
-                                st.toast("¡Buen trabajo! Pasas al siguiente nivel.", icon="✅")
-                                st.rerun() # Recarga la página para mostrar el paso 2
+                                st.toast("¡Buen trabajo!", icon="✅")
+                                st.rerun()
                             else:
                                 st.error("❌ El mesero no entendió. Intenta mencionar la palabra 'cardápio'.")
                                 
                         elif st.session_state.paso_conversacion == 2:
-                            # Validamos que pida carne, comida o use verbos clave
                             if "quero" in texto_min or "gostaria" in texto_min or "picanha" in texto_min or "comer" in texto_min:
                                 st.session_state.paso_conversacion = 3
-                                st.toast("¡Comida ordenada con éxito!", icon="🍖")
+                                st.toast("¡Comida ordenada!", icon="🍖")
                                 st.rerun()
                             else:
-                                st.error("❌ Al mesero no le quedó claro tu pedido. Intenta decir 'Eu quero picanha'.")
+                                st.error("❌ Al mesero no le quedó claro. Intenta decir 'Eu quero picanha'.")
                                 
                         elif st.session_state.paso_conversacion == 3:
                             if "conta" in texto_min:
-                                st.balloons() # ¡Globos al terminar con éxito!
+                                st.balloons()
                                 st.session_state.paso_conversacion = 4
                                 st.rerun()
                             else:
                                 st.error("❌ No has pedido la cuenta todavía. Intenta decir 'A conta, por favor'.")
                                 
                     except sr.UnknownValueError:
-                        st.error("🎙️ No se entendió bien. Habla un poco más claro o fuerte.")
+                        st.error("🎙️ No te entendí bien. Habla un poco más fuerte o claro.")
                     except sr.RequestError:
                         st.error("🌐 Error de conexión.")
 # --- MÓDULO: GIMNASIO (FLASHCARDS) ---
