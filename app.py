@@ -32,57 +32,99 @@ if modulo == "Inicio":
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 elif modulo == "💬 Simulador (Roleplay)":
     st.title("💬 Simulador de Escenarios (Roleplay)")
-    st.write("Practica situaciones reales de tu viaje. La IA evaluará si respondes de manera adecuada.")
+    st.write("Practica situaciones reales. Habla con el mesero y mantén la conversación.")
 
-    # Selector de escenarios (por ahora activamos Restaurante)
-    escenario = st.selectbox("Selecciona dónde estás:", ["🍽️ En el Restaurante", "✈️ En el Aeropuerto (Próximamente)", "🏨 En el Hotel (Próximamente)"])
+    # Selector de escenarios
+    escenario = st.selectbox("Selecciona dónde estás:", ["🍽️ En el Restaurante", "✈️ En el Aeropuerto (Próximamente)"])
 
     if escenario == "🍽️ En el Restaurante":
-        st.subheader("Escenario: Ordenando comida en la Churrascaria")
+        st.subheader("Escenario: Cenando en la Churrascaria")
         
-        # Estado de la conversación para guiar al usuario
-        st.info("🤵 **El Garçom dice:** 'Olá! Boa noite. Você já sabe o que vai pedir ou gostaria de ver o cardápio?'")
-        st.write("💡 *Pista de traducción:* Te está saludando y preguntando si ya sabes qué pedir o si quieres ver el menú.")
-        
-        st.markdown("---")
-        st.write("🎯 **Tu objetivo:** Pídele el menú con educación usando lo aprendido en la teoría (puedes decir: *'Boa noite, o cardápio por favor'*).")
-        
-        # Grabador de audio (El oído de la app)
-        audio_bytes = audio_recorder(
-            text="Haz clic aquí y responde hablando 🎤", 
-            recording_color="#e83a30", 
-            neutral_color="#6aa36f"
-        )
-        
-        if audio_bytes:
-            st.audio(audio_bytes, format="audio/wav")
-            st.info("🧠 El mesero está procesando tu respuesta...")
-            
-            # Reconocimiento de voz (El cerebro de la app)
-            r = sr.Recognizer()
-            with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
-                audio_data = r.record(source)
-                try:
-                    # Transcribimos lo que el usuario dijo en portugués
-                    texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
-                    st.success(f"🗣️ **Dijiste:** '{texto_reconocido}'")
-                    
-                    # Evaluación lógica muy concreta
-                    texto_minusculas = texto_reconocido.lower()
-                    
-                    if "cardápio" in texto_minusculas or "cardapio" in texto_minusculas:
-                        st.balloons() # ¡Animación de globos por el éxito!
-                        st.success("🤵 **Garçom:** 'Com certeza! Aqui está o cardápio. Hoje a picanha está excelente.'")
-                        st.info("🌟 **Evaluación del Tutor:** ¡Excelente! El mesero entendió perfectamente que querías el menú (*cardápio*) y te lo ha entregado. ¡Misión cumplida por hoy!")
-                    else:
-                        st.warning("🤵 **Garçom:** 'Desculpe, não entendi...'")
-                        st.error("❌ **Evaluación del Tutor:** No mencionaste la palabra clave 'cardápio'. ¡Intenta grabar de nuevo diciendo 'O cardápio, por favor'!")
-                        
-                except sr.UnknownValueError:
-                    st.error("🎙️ No se escuchó muy claro. Intenta hablar un poco más fuerte o más cerca del micrófono.")
-                except sr.RequestError:
-                    st.error("🌐 Error de conexión con el servidor de voz.")
+        # --- CONTROL DE LA MEMORIA DE LA CONVERSACIÓN ---
+        # Si es la primera vez que entramos, empezamos en el Paso 1
+        if "paso_conversacion" not in st.session_state:
+            st.session_state.paso_conversacion = 1
+            st.session_state.historial = []
 
+        # Botón para reiniciar la conversación si el usuario quiere volver a empezar
+        if st.button("🔄 Reiniciar conversación"):
+            st.session_state.paso_conversacion = 1
+            st.session_state.historial = []
+            st.rerun()
+
+        # --- LÓGICA DE LOS PASOS ---
+        
+        # PASO 1: El saludo y pedir el menú
+        if st.session_state.paso_conversacion == 1:
+            st.info("🤵 **El Garçom diz:** 'Olá! Boa noite. Seja bem-vindo! Você já sabe o que vai pedir ou gostaria de ver o cardápio?'")
+            st.write("🎯 **Tu objetivo:** Saluda y pídele el menú (ej. *'Boa noite, o cardápio por favor'*).")
+
+        # PASO 2: Ordenar la comida
+        elif st.session_state.paso_conversacion == 2:
+            st.info("🤵 **El Garçom diz:** 'Com certeza, aqui está o cardápio! Hoje a nossa picanha está maravilhosa. O que você vai querer comer?'")
+            st.write("🎯 **Tu objetivo:** Pide tu comida usando 'Eu quero' o 'Eu gostaria de' (ej. *'Eu quero a picanha, por favor'*).")
+
+        # PASO 3: Pedir la cuenta
+        elif st.session_state.paso_conversacion == 3:
+            st.info("🤵 **El Garçom diz:** 'Excelente escolha! Aqui está o seu prato... Bom apetite! ... Algo mais ou posso trazer a conta?'")
+            st.write("🎯 **Tu objetivo:** Dile que todo estuvo rico y pide la cuenta (ej. *'A conta, por favor'*).")
+        
+        # PASO FINAL: Despedida
+        elif st.session_state.paso_conversacion == 4:
+            st.success("🎉 ¡Felicidades! Completaste toda la conversación en el restaurante.")
+            st.info("🤵 **El Garçom diz:** 'Perfeito! Aqui está a conta. Muito obrigado pela visita e boa viagem pelo Brasil!'")
+
+        # --- EL MICRÓFONO (Solo se muestra si no hemos terminado) ---
+        if st.session_state.paso_conversacion < 4:
+            st.markdown("---")
+            audio_bytes = audio_recorder(
+                text="Haz clic para responder hablando 🎤", 
+                recording_color="#e83a30", 
+                neutral_color="#6aa36f"
+            )
+            
+            if audio_bytes:
+                st.audio(audio_bytes, format="audio/wav")
+                
+                # Procesar audio con la IA
+                r = sr.Recognizer()
+                with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                    audio_data = r.record(source)
+                    try:
+                        texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
+                        st.success(f"🗣️ **Tu respuesta:** '{texto_reconocido}'")
+                        texto_min = texto_reconocido.lower()
+                        
+                        # VALIDACIÓN SEGÚN EL PASO ACTUAL
+                        if st.session_state.paso_conversacion == 1:
+                            if "cardápio" in texto_min or "cardapio" in texto_min:
+                                st.session_state.paso_conversacion = 2
+                                st.toast("¡Buen trabajo! Pasas al siguiente nivel.", icon="✅")
+                                st.rerun() # Recarga la página para mostrar el paso 2
+                            else:
+                                st.error("❌ El mesero no entendió. Intenta mencionar la palabra 'cardápio'.")
+                                
+                        elif st.session_state.paso_conversacion == 2:
+                            # Validamos que pida carne, comida o use verbos clave
+                            if "quero" in texto_min or "gostaria" in texto_min or "picanha" in texto_min or "comer" in texto_min:
+                                st.session_state.paso_conversacion = 3
+                                st.toast("¡Comida ordenada con éxito!", icon="🍖")
+                                st.rerun()
+                            else:
+                                st.error("❌ Al mesero no le quedó claro tu pedido. Intenta decir 'Eu quero picanha'.")
+                                
+                        elif st.session_state.paso_conversacion == 3:
+                            if "conta" in texto_min:
+                                st.balloons() # ¡Globos al terminar con éxito!
+                                st.session_state.paso_conversacion = 4
+                                st.rerun()
+                            else:
+                                st.error("❌ No has pedido la cuenta todavía. Intenta decir 'A conta, por favor'.")
+                                
+                    except sr.UnknownValueError:
+                        st.error("🎙️ No se entendió bien. Habla un poco más claro o fuerte.")
+                    except sr.RequestError:
+                        st.error("🌐 Error de conexión.")
 # --- MÓDULO: GIMNASIO (FLASHCARDS) ---
 elif modulo == "🧠 Gimnasio (Flashcards)":
     st.title("🧠 Gimnasio de Vocabulario")
