@@ -1,0 +1,4 @@
+streamlit
+supabase
+audio-recorder-streamlit
+SpeechRecognition
