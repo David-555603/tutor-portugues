@@ -77,16 +77,17 @@ elif modulo == "🧠 Gimnasio (Flashcards)":
 
 # --- OTROS MÓDULOS ---
 # --- MÓDULO: TEORÍA Y CLASES ---
+# --- MÓDULO: TEORÍA Y CLASES ---
 elif modulo == "📚 Teoría y Clases":
     st.title("📚 Módulo de Gramática y Supervivencia")
-    st.write("Aprende las reglas, domina los sonidos y ponte a prueba.")
+    st.write("Aprende las reglas, domina los sonidos y ponte a prueba para sobrevivir en Brasil.")
 
-    # Usamos pestañas para organizar el contenido y que no sea infinito en el celular
-    tab1, tab2, tab3, tab4 = st.tabs(["🗣️ Pronunciación", "🤝 Saludos", "🏃‍♂️ Verbos Clave", "📝 Quiz"])
+    # Añadimos la pestaña de Restaurante y ampliamos a 5 pestañas
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🗣️ Pronunciación", "🤝 Saludos", "🏃‍♂️ Verbos Clave", "🍽️ Restaurante", "📝 Quiz"])
 
     with tab1:
         st.header("Los Sonidos del Portugués (Fase 1)")
-        st.write("Si lees el portugués como se escribe en español, los brasileños no te entenderán. Memoriza estas 4 reglas de oro:")
+        st.write("Si lees el portugués como se escribe en español, los brasileños no te entenderán. Memoriza estas 5 reglas de oro:")
         
         st.info("**1. La 'R' al principio de la palabra suena como 'J' suave:**")
         st.write("* *Restaurante* se pronuncia 'Jestauranchi'.")
@@ -103,15 +104,22 @@ elif modulo == "📚 Teoría y Clases":
         st.info("**4. LH y NH (Las letras mágicas):**")
         st.write("* **LH** suena como nuestra 'LL' o 'Y': *Trabalho* (Trabayu).")
         st.write("* **NH** suena como nuestra 'Ñ': *Banheiro* (Bañeiru - Baño).")
+        
+        st.info("**5. El sonido nasal (La tilde ~):**")
+        st.write("* Las palabras con **ão** suenan como si hablaras con la nariz tapada.")
+        st.write("* *Pão* (Pan) suena nasal. ¡Cuidado de no decir 'Pau' con la boca abierta porque significa otra cosa muy distinta en Brasil!")
+        st.write("* *Não* (No) suena como un 'Ná-o' nasal.")
 
     with tab2:
         st.header("Saludos y Cortesía Básica")
-        st.write("Lo mínimo indispensable para ser un turista educado.")
+        st.write("Lo mínimo indispensable para ser un turista educado y caerle bien a los locales.")
         
         st.markdown("""
         * **Bom dia / Boa tarde / Boa noite:** Buenos días / tardes / noches.
         * **Oi, tudo bem?:** Hola, ¿todo bien? (El saludo más común).
-        * **Obrigado (si eres hombre) / Obrigada (si eres mujer):** Gracias.
+        * **Tudo joia?:** ¿Todo excelente? (Una alternativa informal y muy amigable).
+        * **Obrigado (hombres) / Obrigada (mujeres):** Gracias.
+        * **De nada / Imagina:** De nada. ("Imagina" se usa muchísimo).
         * **Por favor:** Por favor.
         * **Com licença:** Con permiso.
         * **Desculpe:** Disculpa.
@@ -122,11 +130,14 @@ elif modulo == "📚 Teoría y Clases":
         st.header("Verbos de Supervivencia")
         st.write("No necesitas conjugar todos los tiempos perfectos, solo necesitas saber pedir cosas.")
         
-        with st.expander("Querer (Eu quero) - Para pedir en restaurantes y tiendas"):
+        with st.expander("Querer (Eu quero) - Directo y al grano"):
             st.write("**Eu quero:** Yo quiero.")
             st.write("*Ejemplo:* Eu quero uma água, por favor. (Quiero un agua, por favor).")
-            st.write("**Você quer?:** ¿Tú quieres? / ¿Usted quiere?")
         
+        with st.expander("Gostar (Eu gostaria de) - La forma educada"):
+            st.write("**Eu gostaria de...:** Me gustaría...")
+            st.write("*Ejemplo:* Eu gostaria de pedir a conta. (Me gustaría pedir la cuenta).")
+            
         with st.expander("Ter (Ter/Tener) - Para preguntar si hay algo"):
             st.write("**Tem...?:** ¿Hay...? / ¿Tienen...?")
             st.write("*Ejemplo:* Tem banheiro? (¿Hay baño?).")
@@ -137,23 +148,52 @@ elif modulo == "📚 Teoría y Clases":
             st.write("**Posso pagar com cartão?:** ¿Puedo pagar con tarjeta?")
 
     with tab4:
+        st.header("🍽️ En el Restaurante")
+        st.write("El vocabulario sagrado para disfrutar de la comida brasileña sin estrés.")
+        
+        st.subheader("Vocabulario Esencial")
+        st.markdown("""
+        * **O Cardápio:** El menú.
+        * **O Garçom / A Garçonete:** El mesero / La mesera.
+        * **A Conta:** La cuenta.
+        * **O Troco:** El cambio (vuelto).
+        * **Para levar:** Para llevar.
+        * **Sobremesa:** Postre.
+        * **Copo / Taça:** Vaso / Copa.
+        """)
+        
+        st.subheader("Frases Salvavidas")
+        st.info("**Para pedir la mesa:**")
+        st.write("* *Uma mesa para dois, por favor.* (Una mesa para dos, por favor).")
+        st.info("**Para ordenar:**")
+        st.write("* *Você tem o cardápio, por favor?* (¿Tienes el menú, por favor?).")
+        st.write("* *O que você recomenda?* (¿Qué recomiendas?).")
+        st.write("* *Eu vou querer a picanha.* (Voy a querer la picanha).")
+        st.info("**Para pagar:**")
+        st.write("* *A conta, por favor.* (La cuenta, por favor).")
+        st.write("* *Vocês aceitam cartão ou só Pix?* (¿Aceptan tarjeta o solo Pix?).")
+        
+        st.warning("💡 **Tip Cultural:** En Brasil, la propina (*gorjeta* o *taxa de serviço*) de 10% ya viene incluida casi siempre en el total de la cuenta. No necesitas dejar dinero extra en la mesa a menos que quieras.")
+
+    with tab5:
         st.header("📝 Prueba tu conocimiento")
         st.write("Veamos si prestaste atención a las reglas. Responde este pequeño test:")
         
-        # Pregunta 1
         q1 = st.radio("1. Si ves un letrero que dice 'Banheiro', ¿cómo lo pronuncias?", 
                       ["Ban-hei-ro", "Ba-ñei-ru", "Ba-ne-iro"], key="q1")
         
-        # Pregunta 2
         q2 = st.radio("2. Eres hombre y te acaban de traer tu café, ¿qué dices?", 
                       ["Obrigada", "Gracias", "Obrigado"], key="q2")
         
-        # Pregunta 3
-        q3 = st.radio("3. ¿Cómo pides un vaso de agua?", 
-                      ["Yo quiero uma água.", "Eu quero uma água.", "Tem uma água?"], key="q3")
+        q3 = st.radio("3. ¿Cómo pides la cuenta en el restaurante?", 
+                      ["A conta, por favor.", "O cardápio, por favor.", "O troco, por favor."], key="q3")
+                      
+        q4 = st.radio("4. ¿Qué es la 'taxa de serviço'?", 
+                      ["El impuesto del gobierno", "La propina del 10% incluida", "El costo de usar el baño"], key="q4")
         
         if st.button("Revisar mis respuestas"):
             puntaje = 0
+            
             if q1 == "Ba-ñei-ru":
                 st.success("1. ¡Correcto! NH suena como Ñ, y la O final suena como U.")
                 puntaje += 1
@@ -161,15 +201,21 @@ elif modulo == "📚 Teoría y Clases":
                 st.error("1. Incorrecto. Recuerda la regla del NH y la O final.")
                 
             if q2 == "Obrigado":
-                st.success("2. ¡Correcto! Los hombres dicen Obrigado, las mujeres Obrigada.")
+                st.success("2. ¡Correcto! Los hombres dicen Obrigado.")
                 puntaje += 1
             else:
-                st.error("2. Incorrecto. Depende de tu género, no del de la otra persona.")
+                st.error("2. Incorrecto. Depende de tu género.")
                 
-            if q3 == "Eu quero uma água.":
-                st.success("3. ¡Correcto! 'Eu quero' es la forma perfecta de pedir algo.")
+            if q3 == "A conta, por favor.":
+                st.success("3. ¡Correcto! 'A conta' es la cuenta. 'Cardápio' es el menú.")
                 puntaje += 1
             else:
-                st.error("3. Incorrecto. Revisa la pestaña de Verbos Clave.")
+                st.error("3. Incorrecto. Revisa la pestaña del Restaurante.")
                 
-            st.write(f"**Tu puntaje: {puntaje}/3**")
+            if q4 == "La propina del 10% incluida":
+                st.success("4. ¡Correcto! Te ahorrará confusiones al pagar.")
+                puntaje += 1
+            else:
+                st.error("4. Incorrecto. Es la propina de los meseros.")
+                
+            st.write(f"**Tu puntaje: {puntaje}/4**")
