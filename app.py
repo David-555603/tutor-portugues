@@ -31,108 +31,166 @@ if modulo == "Inicio":
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 # --- MÓDULO: SIMULADOR (ROLEPLAY) ---
 elif modulo == "💬 Simulador (Roleplay)":
-    from gtts import gTTS # Importamos el generador de voz de Google
+    from gtts import gTTS 
+    import io
 
     st.title("💬 Simulador de Escenarios (Roleplay)")
-    st.write("Practica situaciones reales. Escucha al mesero y mantén la conversación.")
+    st.write("Practica situaciones reales. Escucha al personaje y mantén la conversación.")
 
-    # Selector de escenarios
-    escenario = st.selectbox("Selecciona dónde estás:", ["🍽️ En el Restaurante", "✈️ En el Aeropuerto (Próximamente)"])
+    # --- FUNCIÓN GLOBAL PARA LAS VOCES ---
+    def reproducir_voz(texto):
+        tts = gTTS(text=texto, lang='pt', tld='com.br')
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        st.audio(fp, format='audio/mp3')
 
+    # Selector de escenarios (¡Ahora con dos opciones!)
+    escenario = st.selectbox("Selecciona dónde estás:", [
+        "🍽️ En el Restaurante", 
+        "👋 Conociendo a alguien", 
+        "✈️ En el Aeropuerto (Próximamente)"
+    ])
+
+    # ==========================================
+    # ESCENARIO 1: EL RESTAURANTE
+    # ==========================================
     if escenario == "🍽️ En el Restaurante":
         st.subheader("Escenario: Cenando en la Churrascaria")
         
-        # --- FUNCIÓN PARA QUE EL MESERO HABLE ---
-        def voz_mesero(texto):
-            # Generamos el audio en portugués de Brasil (pt-br)
-            tts = gTTS(text=texto, lang='pt', tld='com.br')
-            fp = io.BytesIO()
-            tts.write_to_fp(fp)
-            fp.seek(0)
-            st.audio(fp, format='audio/mp3')
+        if "paso_restaurante" not in st.session_state:
+            st.session_state.paso_restaurante = 1
 
-        # --- CONTROL DE LA MEMORIA DE LA CONVERSACIÓN ---
-        if "paso_conversacion" not in st.session_state:
-            st.session_state.paso_conversacion = 1
-
-        if st.button("🔄 Reiniciar conversación"):
-            st.session_state.paso_conversacion = 1
+        if st.button("🔄 Reiniciar conversación", key="btn_rest"):
+            st.session_state.paso_restaurante = 1
             st.rerun()
 
-        # --- LÓGICA DE LOS PASOS ---
-        
-        # PASO 1: El saludo
-        if st.session_state.paso_conversacion == 1:
+        if st.session_state.paso_restaurante == 1:
             dialogo = "Olá! Boa noite. Seja bem-vindo! Você já sabe o que vai pedir ou gostaria de ver o cardápio?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
-            voz_mesero(dialogo) # ¡Aquí suena el audio!
+            reproducir_voz(dialogo) 
             st.write("🎯 **Tu objetivo:** Saluda y pídele el menú (ej. *'Boa noite, o cardápio por favor'*).")
 
-        # PASO 2: Ordenar
-        elif st.session_state.paso_conversacion == 2:
+        elif st.session_state.paso_restaurante == 2:
             dialogo = "Com certeza, aqui está o cardápio! Hoje a nossa picanha está maravilhosa. O que você vai querer comer?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
-            voz_mesero(dialogo)
+            reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Pide tu comida (ej. *'Eu quero a picanha, por favor'*).")
 
-        # PASO 3: La cuenta
-        elif st.session_state.paso_conversacion == 3:
+        elif st.session_state.paso_restaurante == 3:
             dialogo = "Excelente escolha! Aqui está o seu prato... Algo mais ou posso trazer a conta?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
-            voz_mesero(dialogo)
+            reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Pide la cuenta (ej. *'A conta, por favor'*).")
         
-        # PASO FINAL
-        elif st.session_state.paso_conversacion == 4:
+        elif st.session_state.paso_restaurante == 4:
             st.success("🎉 ¡Felicidades! Completaste toda la conversación.")
             dialogo = "Perfeito! Aqui está a conta. Muito obrigado pela visita e boa viagem pelo Brasil!"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
-            voz_mesero(dialogo)
+            reproducir_voz(dialogo)
 
-        # --- EL MICRÓFONO ---
-        if st.session_state.paso_conversacion < 4:
+        if st.session_state.paso_restaurante < 4:
             st.markdown("---")
-            audio_bytes = audio_recorder(
-                text="Haz clic para responder hablando 🎤", 
-                recording_color="#e83a30", 
-                neutral_color="#6aa36f"
-            )
+            audio_bytes = audio_recorder(text="Haz clic para responder falando 🎤", recording_color="#e83a30", neutral_color="#6aa36f", key="mic_rest")
             
             if audio_bytes:
-                # Ocultamos la reproducción de tu propio audio para no saturar la pantalla
                 st.info("🧠 Escuchando tu acento...")
-                
                 r = sr.Recognizer()
                 with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
                     audio_data = r.record(source)
                     try:
-                        texto_reconocido = r.recognize_google(audio_data, language="pt-BR")
-                        st.success(f"🗣️ **Te escuché decir:** '{texto_reconocido}'")
-                        texto_min = texto_reconocido.lower()
+                        texto = r.recognize_google(audio_data, language="pt-BR").lower()
+                        st.success(f"🗣️ **Te escuché decir:** '{texto}'")
                         
-                        if st.session_state.paso_conversacion == 1:
-                            if "cardápio" in texto_min or "cardapio" in texto_min:
-                                st.session_state.paso_conversacion = 2
-                                st.toast("¡Buen trabajo!", icon="✅")
+                        if st.session_state.paso_restaurante == 1 and ("cardápio" in texto or "cardapio" in texto):
+                            st.session_state.paso_restaurante = 2
+                            st.rerun()
+                        elif st.session_state.paso_restaurante == 2 and ("quero" in texto or "gostaria" in texto or "picanha" in texto or "comer" in texto):
+                            st.session_state.paso_restaurante = 3
+                            st.rerun()
+                        elif st.session_state.paso_restaurante == 3 and "conta" in texto:
+                            st.balloons()
+                            st.session_state.paso_restaurante = 4
+                            st.rerun()
+                        else:
+                            st.error("❌ No logré validar la palabra clave para este paso. ¡Intenta de nuevo!")
+                    except:
+                        st.error("🎙️ No te entendí bien. Habla un poco más fuerte o claro.")
+
+    # ==========================================
+    # ESCENARIO 2: CHARLA CASUAL
+    # ==========================================
+    elif escenario == "👋 Conociendo a alguien":
+        st.subheader("Escenario: Haciendo un amigo en la playa 🏖️")
+        
+        if "paso_casual" not in st.session_state:
+            st.session_state.paso_casual = 1
+
+        if st.button("🔄 Reiniciar conversación", key="btn_cas"):
+            st.session_state.paso_casual = 1
+            st.rerun()
+
+        if st.session_state.paso_casual == 1:
+            dialogo = "Oi! Tudo bem? Que dia bonito, né? Meu nome é Lucas. E você, como se chama?"
+            st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            reproducir_voz(dialogo)
+            st.write("🎯 **Tu objetivo:** Responde al saludo y di tu nombre (ej. *'Tudo bem, meu nome é...'* o *'Eu sou o...'*).")
+
+        elif st.session_state.paso_casual == 2:
+            dialogo = "Prazer em conhecer! O seu sotaque é diferente. De onde você é?"
+            st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            reproducir_voz(dialogo)
+            st.write("🎯 **Tu objetivo:** Dile de qué país eres (ej. *'Eu sou da Colômbia'*, *'Eu sou do México'*, *'Eu sou da Espanha'*).")
+
+        elif st.session_state.paso_casual == 3:
+            dialogo = "Que legal! Eu sempre quis conhecer lá. E o que você está fazendo aqui no Brasil? Está de férias?"
+            st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            reproducir_voz(dialogo)
+            st.write("🎯 **Tu objetivo:** Confirma que estás de viaje/vacaciones (ej. *'Sim, estou de férias'* o *'Sim, estou a passeio'*).")
+
+        elif st.session_state.paso_casual == 4:
+            st.success("🎉 ¡Felicidades! Tuviste tu primera charla casual en portugués.")
+            dialogo = "Muito bacana! Bom, foi um prazer falar com você. Aproveite muito a viagem! Tchau, tchau!"
+            st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            reproducir_voz(dialogo)
+
+        if st.session_state.paso_casual < 4:
+            st.markdown("---")
+            audio_bytes = audio_recorder(text="Haz clic para responder falando 🎤", recording_color="#e83a30", neutral_color="#6aa36f", key="mic_casual")
+            
+            if audio_bytes:
+                st.info("🧠 Escuchando tu acento...")
+                r = sr.Recognizer()
+                with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                    audio_data = r.record(source)
+                    try:
+                        texto = r.recognize_google(audio_data, language="pt-BR").lower()
+                        st.success(f"🗣️ **Te escuché decir:** '{texto}'")
+                        
+                        # Validación del paso 1 (Busca nombre o frases clave)
+                        if st.session_state.paso_casual == 1:
+                            if "nome" in texto or "chamo" in texto or "sou" in texto or len(texto) > 2:
+                                st.session_state.paso_casual = 2
                                 st.rerun()
                             else:
-                                st.error("❌ El mesero no entendió. Intenta mencionar la palabra 'cardápio'.")
-                                
-                        elif st.session_state.paso_conversacion == 2:
-                            if "quero" in texto_min or "gostaria" in texto_min or "picanha" in texto_min or "comer" in texto_min:
-                                st.session_state.paso_conversacion = 3
-                                st.toast("¡Comida ordenada!", icon="🍖")
+                                st.error("❌ Lucas no escuchó tu nombre. Intenta decir 'Meu nome é...'.")
+                        
+                        # Validación del paso 2 (País de origen)
+                        elif st.session_state.paso_casual == 2:
+                            if "sou" in texto or "de" in texto or "da" in texto or "do" in texto:
+                                st.session_state.paso_casual = 3
                                 st.rerun()
                             else:
-                                st.error("❌ Al mesero no le quedó claro. Intenta decir 'Eu quero picanha'.")
+                                st.error("❌ Lucas no entendió. Intenta decir 'Eu sou de...' o 'Eu sou do/da...'.")
                                 
-                        elif st.session_state.paso_conversacion == 3:
-                            if "conta" in texto_min:
+                        # Validación del paso 3 (Vacaciones)
+                        elif st.session_state.paso_casual == 3:
+                            if "sim" in texto or "férias" in texto or "ferias" in texto or "passeio" in texto or "turismo" in texto:
                                 st.balloons()
-                                st.session_state.paso_conversacion = 4
+                                st.session_state.paso_casual = 4
                                 st.rerun()
                             else:
-                                st.error("❌ No has pedido la cuenta todavía. Intenta decir 'A conta, por favor'.")
+                                st.error("❌ Lucas no entendió bien tu respuesta. Intenta decir 'Sim, estou de férias'.")
                                 
                     except sr.UnknownValueError:
                         st.error("🎙️ No te entendí bien. Habla un poco más fuerte o claro.")
