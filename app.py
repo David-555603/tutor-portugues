@@ -35,7 +35,7 @@ elif modulo == "💬 Simulador (Roleplay)":
     import io
 
     st.title("💬 Simulador de Escenarios (Roleplay)")
-    st.write("Practica situaciones reales. Escucha al personaje y mantén la conversación.")
+    st.write("Practica situaciones reales. Escucha al personaje, lee la traducción y mantén la conversación.")
 
     # --- FUNCIÓN GLOBAL PARA LAS VOCES ---
     def reproducir_voz(texto):
@@ -45,7 +45,7 @@ elif modulo == "💬 Simulador (Roleplay)":
         fp.seek(0)
         st.audio(fp, format='audio/mp3')
 
-    # Selector de escenarios (¡Ahora con dos opciones!)
+    # Selector de escenarios
     escenario = st.selectbox("Selecciona dónde estás:", [
         "🍽️ En el Restaurante", 
         "👋 Conociendo a alguien", 
@@ -68,18 +68,21 @@ elif modulo == "💬 Simulador (Roleplay)":
         if st.session_state.paso_restaurante == 1:
             dialogo = "Olá! Boa noite. Seja bem-vindo! Você já sabe o que vai pedir ou gostaria de ver o cardápio?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Hola! Buenas noches. ¡Bienvenido! ¿Ya sabes qué vas a pedir o te gustaría ver el menú?*")
             reproducir_voz(dialogo) 
             st.write("🎯 **Tu objetivo:** Saluda y pídele el menú (ej. *'Boa noite, o cardápio por favor'*).")
 
         elif st.session_state.paso_restaurante == 2:
             dialogo = "Com certeza, aqui está o cardápio! Hoje a nossa picanha está maravilhosa. O que você vai querer comer?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Claro que sí, aquí tienes el menú! Hoy nuestra picanha está maravillosa. ¿Qué vas a querer comer?*")
             reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Pide tu comida (ej. *'Eu quero a picanha, por favor'*).")
 
         elif st.session_state.paso_restaurante == 3:
             dialogo = "Excelente escolha! Aqui está o seu prato... Algo mais ou posso trazer a conta?"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Excelente elección! Aquí está tu plato... ¿Algo más o puedo traer la cuenta?*")
             reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Pide la cuenta (ej. *'A conta, por favor'*).")
         
@@ -87,6 +90,7 @@ elif modulo == "💬 Simulador (Roleplay)":
             st.success("🎉 ¡Felicidades! Completaste toda la conversación.")
             dialogo = "Perfeito! Aqui está a conta. Muito obrigado pela visita e boa viagem pelo Brasil!"
             st.info(f"🤵 **El Garçom diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Perfecto! Aquí tienes la cuenta. ¡Muchas gracias por tu visita y buen viaje por Brasil!*")
             reproducir_voz(dialogo)
 
         if st.session_state.paso_restaurante < 4:
@@ -133,18 +137,21 @@ elif modulo == "💬 Simulador (Roleplay)":
         if st.session_state.paso_casual == 1:
             dialogo = "Oi! Tudo bem? Que dia bonito, né? Meu nome é Lucas. E você, como se chama?"
             st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Hola! ¿Todo bien? Qué día tan bonito, ¿verdad? Mi nombre es Lucas. Y tú, ¿cómo te llamas?*")
             reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Responde al saludo y di tu nombre (ej. *'Tudo bem, meu nome é...'* o *'Eu sou o...'*).")
 
         elif st.session_state.paso_casual == 2:
             dialogo = "Prazer em conhecer! O seu sotaque é diferente. De onde você é?"
             st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Un placer conocerte! Tu acento es diferente. ¿De dónde eres?*")
             reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Dile de qué país eres (ej. *'Eu sou da Colômbia'*, *'Eu sou do México'*, *'Eu sou da Espanha'*).")
 
         elif st.session_state.paso_casual == 3:
             dialogo = "Que legal! Eu sempre quis conhecer lá. E o que você está fazendo aqui no Brasil? Está de férias?"
             st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Qué genial! Siempre quise conocer ahí. ¿Y qué estás haciendo aquí en Brasil? ¿Estás de vacaciones?*")
             reproducir_voz(dialogo)
             st.write("🎯 **Tu objetivo:** Confirma que estás de viaje/vacaciones (ej. *'Sim, estou de férias'* o *'Sim, estou a passeio'*).")
 
@@ -152,6 +159,7 @@ elif modulo == "💬 Simulador (Roleplay)":
             st.success("🎉 ¡Felicidades! Tuviste tu primera charla casual en portugués.")
             dialogo = "Muito bacana! Bom, foi um prazer falar com você. Aproveite muito a viagem! Tchau, tchau!"
             st.info(f"👦 **Lucas diz:** '{dialogo}'")
+            st.caption("💡 *Traducción: ¡Muy chévere! Bueno, fue un placer hablar contigo. ¡Disfruta mucho el viaje! ¡Chao, chao!*")
             reproducir_voz(dialogo)
 
         if st.session_state.paso_casual < 4:
@@ -167,7 +175,7 @@ elif modulo == "💬 Simulador (Roleplay)":
                         texto = r.recognize_google(audio_data, language="pt-BR").lower()
                         st.success(f"🗣️ **Te escuché decir:** '{texto}'")
                         
-                        # Validación del paso 1 (Busca nombre o frases clave)
+                        # Validación del paso 1
                         if st.session_state.paso_casual == 1:
                             if "nome" in texto or "chamo" in texto or "sou" in texto or len(texto) > 2:
                                 st.session_state.paso_casual = 2
@@ -175,7 +183,7 @@ elif modulo == "💬 Simulador (Roleplay)":
                             else:
                                 st.error("❌ Lucas no escuchó tu nombre. Intenta decir 'Meu nome é...'.")
                         
-                        # Validación del paso 2 (País de origen)
+                        # Validación del paso 2
                         elif st.session_state.paso_casual == 2:
                             if "sou" in texto or "de" in texto or "da" in texto or "do" in texto:
                                 st.session_state.paso_casual = 3
@@ -183,7 +191,7 @@ elif modulo == "💬 Simulador (Roleplay)":
                             else:
                                 st.error("❌ Lucas no entendió. Intenta decir 'Eu sou de...' o 'Eu sou do/da...'.")
                                 
-                        # Validación del paso 3 (Vacaciones)
+                        # Validación del paso 3
                         elif st.session_state.paso_casual == 3:
                             if "sim" in texto or "férias" in texto or "ferias" in texto or "passeio" in texto or "turismo" in texto:
                                 st.balloons()
