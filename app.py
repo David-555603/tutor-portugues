@@ -207,18 +207,98 @@ elif modulo == "💬 Simulador (Roleplay)":
 # --- MÓDULO: GIMNASIO (FLASHCARDS) ---
 elif modulo == "🧠 Gimnasio (Flashcards)":
     st.title("🧠 Gimnasio de Vocabulario")
-    
+    st.write("Entrena tu memoria. Di la traducción correcta para avanzar.")
+
+    # 1. Obtener palabras de Supabase
     respuesta = supabase.table("vocabulario").select("*").execute()
-    datos = respuesta.data
-    
-    if len(datos) > 0:
-        st.success("¡Conexión Exitosa! 🎉 Aquí están tus palabras:")
-        for item in datos:
-            with st.expander(f"🇪🇸 {item['espanol']}"):
-                st.write(f"**🇧🇷 Portugués:** {item['portugues']}")
-                st.write(f"**📝 Ejemplo:** {item['ejemplo']}")
+    biblioteca = respuesta.data
+
+    if not biblioteca:
+        st.warning("Tu biblioteca está vacía. Agrega palabras en Supabase para empezar a entrenar.")
     else:
-        st.warning("La tabla está vacía. Agrega palabras en Supabase.")
+        # --- MEMORIA DEL GIMNASIO ---
+        if "indice_flashcard" not in st.session_state:
+            st.session_state.indice_flashcard = 0
+            st.session_state.mostar_respuesta = False
+
+        # Barra de progreso
+        total = len(biblioteca)
+        progreso = (st.session_state.indice_flashcard + 1) / total
+        st.progress(progreso)
+        st.write(f"Palabra {st.session_state.indice_flashcard + 1} de {total}")
+
+        # Palabra actual
+        palabra_actual = biblioteca[st.session_state.indice_flashcard]
+
+        # --- DISEÑO DE LA TARJETA ---
+        st.markdown(f"""
+            <div style="background-color: #f0f2f6; padding: 40px; border-radius: 20px; text-align: center; border: 2px solid #6aa36f;">
+                <h3 style="color: #555;">¿Cómo se dice en portugués?</h3>
+                <h1 style="font-size: 50px; color: #1e293b;">{palabra_actual['espanol']}</h1>
+            </div>
+        """, unsafe_allow_html=True)
+
+        st.write(" ") # Espacio
+
+        # --- ACCIÓN: GRABAR RESPUESTA ---
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            audio_bytes = audio_recorder(
+                text="Responder hablando 🎤", 
+                recording_color="#e83a30", 
+                neutral_color="#6aa36f",
+                key="mic_gym"
+            )
+        
+        with col2:
+            if st.button("👁️ Mostrar respuesta"):
+                st.session_state.mostar_respuesta = True
+
+        # --- LÓGICA DE VALIDACIÓN ---
+        if audio_bytes:
+            r = sr.Recognizer()
+            with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                audio_data = r.record(source)
+                try:
+                    texto_usuario = r.recognize_google(audio_data, language="pt-BR").lower()
+                    respuesta_correcta = palabra_actual['portugues'].lower()
+
+                    st.write(f"🗣️ **Dijiste:** {texto_usuario}")
+
+                    # Verificamos si la palabra clave está en lo que dijo el usuario
+                    if respuesta_correcta in texto_usuario or texto_usuario in respuesta_correcta:
+                        st.success("¡Excelente! Es correcto. 🎉")
+                        st.session_state.mostar_respuesta = True
+                    else:
+                        st.error(f"Casi... la respuesta esperada era: **{palabra_actual['portugues']}**")
+                        st.session_state.mostar_respuesta = True
+                        
+                except:
+                    st.error("No pude entender el audio. Intenta de nuevo.")
+
+        # --- MOSTRAR DETALLES Y SIGUIENTE ---
+        if st.session_state.mostar_respuesta:
+            st.markdown("---")
+            st.info(f"🇧🇷 **Portugués:** {palabra_actual['portugues']}")
+            st.write(f"📝 **Ejemplo:** {palabra_actual['ejemplo']}")
+            
+            if st.button("Siguiente palabra ➡️"):
+                if st.session_state.indice_flashcard < total - 1:
+                    st.session_state.indice_flashcard += 1
+                else:
+                    st.balloons()
+                    st.success("¡Completaste todo tu vocabulario por hoy! 🚀")
+                    st.session_state.indice_flashcard = 0
+                
+                st.session_state.mostar_respuesta = False
+                st.rerun()
+
+        # Botón para reiniciar sesión
+        if st.sidebar.button("🔄 Reiniciar Gimnasio"):
+            st.session_state.indice_flashcard = 0
+            st.session_state.mostar_respuesta = False
+            st.rerun()
 
 # --- OTROS MÓDULOS ---
 # --- MÓDULO: TEORÍA Y CLASES ---
